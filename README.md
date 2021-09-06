@@ -1,4 +1,4 @@
-# A 141x webhook runner
+# A Cardano Webhook Runner for the 141x Platform
 
 ## Usage
 
