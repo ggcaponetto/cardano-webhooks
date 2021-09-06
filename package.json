@@ -1,0 +1,31 @@
+{
+  "name": "cardano-webhooks",
+  "version": "0.24.0",
+  "description": "A runner for cardano webhooks on the 141x platform",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node ./src/index.js",
+    "test": "nyc mocha",
+    "build": "pkg ./src/index.js --targets node16-windows-x64 --output ./build/141x-runner-windows.exe && pkg ./src/index.js --targets node16-linux-x64 --output ./build/141x-runner-linux"
+  },
+  "dependencies": {
+    "axios": "^0.21.3",
+    "chalk": "^4.1.0",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "jsencrypt": "^3.2.1",
+    "loglevel": "^1.7.1",
+    "socket.io": "^4.1.3",
+    "socket.io-client": "^4.2.0",
+    "yargs": "^16.2.0"
+  },
+  "author": "Giuseppe Giulio Caponetto",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.1.1",
+    "nyc": "^15.1.0"
+  }
+}
