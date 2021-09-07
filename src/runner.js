@@ -17,9 +17,26 @@ const packageJson = require('../package.json');
 
 log.setLevel('debug');
 
+const SOCKETIO_MAINNET = process.env.SOCKETIO_MAINNET || (() => {
+  const host = 'https://gateway.141x.io:443';
+  console.info(`no SOCKETIO_MAINNET found. Using default: ${host}`);
+  return host;
+})();
+const SOCKETIO_TESTNET = process.env.SOCKETIO_TESTNET || (() => {
+  const host = 'https://gateway.141x-testnet.io:443';
+  console.info(`no SOCKETIO_TESTNET found. Using default: ${host}`);
+  return host;
+})();
+const SOCKETIO_ALT = process.env.SOCKETIO_ALT || (() => {
+  const host = 'http://localhost:5003';
+  console.info(`no SOCKETIO_TESTNET found. Using default: ${host}`);
+  return host;
+})();
+
 const socketIoServers = {
-  mainnet: 'https://gateway.141x.io:443',
-  testnet: 'https://gateway.141x-testnet.io:443',
+  mainnet: SOCKETIO_MAINNET,
+  testnet: SOCKETIO_TESTNET,
+  alt: SOCKETIO_ALT,
 };
 
 function loadFile(filePath) {
@@ -31,10 +48,10 @@ function loadFile(filePath) {
       absoluteFilePath = path.resolve(filePath);
     }
     const data = fs.readFileSync(absoluteFilePath, 'utf8');
-    console.log(`loaded ${path}.`, data);
+    // console.log(`loaded file ${path}.`);
     return data;
   } catch (e) {
-    console.log('error:', e);
+    console.log('error loading file:', e);
     return null;
   }
 }
@@ -44,9 +61,11 @@ function getJsEncrypt(privateKey) {
   jsEncrypt.setPrivateKey(privateKey);
   return jsEncrypt;
 }
-function emitPublicKey(socket, privateKey) {
+function emitPublicKey(socket, publicKey, network) {
+  log.debug('client is emitting public key', { publicKey, network });
   socket.emit('keys', {
-    public: privateKey,
+    public: publicKey,
+    network,
   });
 }
 
@@ -82,8 +101,8 @@ async function executeWebhooks(webhooksFileContent, myMessages) {
   const webhooks = JSON.parse(webhooksFileContent).rows;
   const executions = [];
   for (let i = 0; i < webhooks.length; i++) {
-    const webhook = webhooks[i].doc;
-    log.debug(`running webhook "${webhook.name}"`, webhook);
+    const webhook = webhooks[i];
+    log.debug(`running webhook "${webhook.doc.name}"`, webhook);
     const util = {
       toast: (myMessage, toastOptions) => {
         log.log(myMessage, toastOptions);
@@ -92,13 +111,22 @@ async function executeWebhooks(webhooksFileContent, myMessages) {
       axios,
     };
     const ctx = { webhook, util };
-    if (!webhook.active) return null;
+    if (!webhook.doc.active) return null;
     try {
       // eslint-disable-next-line no-new-func,no-undef
       const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
-      const runnerFunction = new AsyncFunction('ctx', `"use strict"; ${webhook.script}`);
-      const res = await runnerFunction(ctx);
-      executions.push({ success: true, res, error: null });
+      globalThis.ctx = ctx;
+      const runnerFunction = new AsyncFunction(`"use strict"; ${webhook.doc.script};`);
+      const res = await runnerFunction().catch((e) => {
+        console.error(`error in runnerFunction (${webhook.doc.name})`, e);
+        executions.push({ success: false, res: null, error: e });
+        return e;
+      });
+      delete globalThis.ctx;
+      if (res) {
+        executions.push({ success: true, res, error: null });
+      }
+      return executions;
     } catch (e) {
       log.error(e.message, e);
       executions.push({ success: false, res: null, error: e });
@@ -107,33 +135,39 @@ async function executeWebhooks(webhooksFileContent, myMessages) {
   return executions;
 }
 
-function run(argv) {
+async function run(argv) {
   const getConnectionString = () => {
     if (argv.mainnet) {
       return socketIoServers.mainnet;
     } if (argv.testnet) {
       return socketIoServers.testnet;
+    } if (argv.alt) {
+      return socketIoServers.alt;
     }
     return socketIoServers.testnet;
   };
-  const socket = io(getConnectionString());
-  // client-side
-  socket.on('connect', () => {
-    log.log(socket.id); // x8WIv7-mJelg7on_ALbx
+  return new Promise((res) => {
+    const connectionString = getConnectionString();
+    log.log('connecting to ', connectionString); // x8WIv7-mJelg7on_ALbx
+    const socket = io(connectionString);
+    // client-side
+    socket.on('connect', () => {
+      log.log('connect event fired', socket.id); // x8WIv7-mJelg7on_ALbx
+      res(socket);
+    });
+    socket.on('disconnect', () => {
+      log.log('disconnect event fired', socket.id); // undefined
+    });
   });
-  socket.on('disconnect', () => {
-    log.log(socket.id); // undefined
-  });
-  return socket;
 }
 function disconnect(socket) {
   socket.disconnect();
 }
 
-function main(argv) {
-  const socket = run(argv);
-  if (!argv.mainnet && !argv.testnet) {
-    throw Error('please provide a --testnet or --mainnet argument');
+async function main(argv) {
+  const socket = await run(argv);
+  if (!argv.mainnet && !argv.testnet && !argv.alt) {
+    throw Error('please provide a --testnet, --mainnet or --alt argument');
   }
   if (!argv['private-key']) {
     throw Error('please provide a --private-key argument');
@@ -142,7 +176,9 @@ function main(argv) {
     throw Error('please provide a --config argument');
   }
   const privateKey = loadFile(argv['private-key']);
+  log.log('loaded private key', argv['private-key']);
   const webhookFileContent = loadFile(argv.config);
+  log.log('loaded webhook config', argv.config);
   const jsEncrypt = getJsEncrypt(privateKey);
   const onMessage = async (event, ...args) => {
     console.log(`Got "${event}" from ${socket.io.uri}`, {
@@ -151,15 +187,8 @@ function main(argv) {
     if (event === 'payments') {
       // eslint-disable-next-line max-len
       const { payments } = parsePaymentsMessage(args, jsEncrypt);
-      // eslint-disable-next-line max-len
-      console.log(`Got "${event}" from ${socket.io.uri}`, {
-        payments,
-      });
     } else if (event === 'buffer') {
       const { messages, payments } = parseBufferMessage(args, jsEncrypt);
-      console.log(`Got "${event}" from ${socket.io.uri}`, {
-        payments, messages,
-      });
       if (payments.length > 0 && messages.length > 0) {
         const executions = await executeWebhooks(webhookFileContent, messages);
         console.log('executed webhooks', {
@@ -169,7 +198,8 @@ function main(argv) {
     }
   };
   socket.onAny(onMessage);
-  emitPublicKey(socket, jsEncrypt.getPublicKey());
+  const network = argv.mainnet ? 'mainnet' : 'testnet';
+  emitPublicKey(socket, jsEncrypt.getPublicKey(), network);
 }
 
 module.exports = {

@@ -6,17 +6,17 @@
 1. Export the keys as file
 1. Create some webhooks on [https://141x-testnet.io/](https://141x-testnet.io/) or [https://141x.io/](https://141x.io/)
 1. Download the configuration
-1. Run ``141x-runner-windows.exe --testnet --private-key .\..\test\files\141x-key.private --config .\..\test\files\141x-webhooks-1630617528769.json``
+1. Run ``141x-runner-windows-x64.exe --testnet --private-key .\141x-key.private --config .\141x-webhooks-config.json``
 
 ## Build
 1. ``npm i``
 1. ``npm run build``
 
 ### Node.js
-1. ``node src/index.js --testnet --private-key ./test/files/141x-key.private --config ./test/files/141x-webhooks-1630617528769.json``
+1. ``node src/index.js --testnet --private-key ./141x-key.private --config ./141x-webhooks-config.json``
 
 ### Windows x64
-1. ``141x-runner-windows.exe --testnet --private-key .\..\test\files\141x-key.private --config .\..\test\files\141x-webhooks-1630617528769.json``
+1. ``141x-runner-windows-x64.exe --testnet --private-key .\141x-key.private --config .\141x-webhooks-config.json``
 
 ## Tests
 1. ``npm run test``

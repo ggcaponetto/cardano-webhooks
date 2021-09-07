@@ -32,7 +32,7 @@ aDucXqBBYGLyfaXYQpqsdNB3CMU4wmZQepiEMQG1sws=
   it('should load the file of a given path (collection)', (done) => {
     // eslint-disable-next-line global-require
     const { loadFile } = require('../src/runner');
-    const content = loadFile('../runner/test/files/141x-webhooks-1630617528769.json');
+    const content = loadFile('../runner/test/files/141x-webhooks-config.json');
     if (content) {
       const parsed = JSON.parse(content);
       chai.expect(typeof parsed).to.equal('object');
@@ -46,9 +46,9 @@ aDucXqBBYGLyfaXYQpqsdNB3CMU4wmZQepiEMQG1sws=
       executeWebhooks,
       // eslint-disable-next-line global-require
     } = require('../src/runner');
-    const socket = run();
+    const socket = run({ testnet: true, mainnet: false });
     const privateKey = loadFile('../runner/test/files/141x-key.private');
-    const webhookFileContent = loadFile('../runner/test/files/141x-webhooks-1630617528769.json');
+    const webhookFileContent = loadFile('../runner/test/files/141x-webhooks-config.json');
     const jsEncrypt = getJsEncrypt(privateKey);
 
     const onMessage = async (event, ...args) => {
@@ -81,5 +81,38 @@ aDucXqBBYGLyfaXYQpqsdNB3CMU4wmZQepiEMQG1sws=
     };
     socket.onAny(onMessage);
     emitPublicKey(socket, jsEncrypt.getPublicKey());
+  });
+  it('runs an async function', async function () {
+    this.timeout(5 * 1000);
+    const {
+      loadFile,
+      // eslint-disable-next-line global-require
+    } = require('../src/runner');
+    const webhookFileContent = loadFile('../runner/test/files/141x-webhooks-config.json');
+    const collection = JSON.parse(webhookFileContent);
+    const webhooks = collection.rows;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const webhook of webhooks) {
+      const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+      const util = {
+        toast: (myMessage, toastOptions) => {
+          console.log(myMessage, toastOptions);
+        },
+        updates: [],
+        axios,
+      };
+      const ctx = { webhook, util };
+      globalThis.ctx = ctx;
+      console.debug(`running (${webhook.doc.name})`);
+      const runnerFunction = new AsyncFunction(`"use strict"; ${webhook.doc.script};`);
+      const res = await runnerFunction().catch((e) => {
+        console.error(`error in runnerFunction (${webhook.doc.name})`, e);
+        return e;
+      });
+      delete globalThis.ctx;
+      if (res) {
+        console.debug('response', res.data);
+      }
+    }
   });
 });

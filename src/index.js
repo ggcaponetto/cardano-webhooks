@@ -19,5 +19,5 @@ const { argv } = yargs(hideBin(process.argv));
 const { main } = require('./runner');
 
 log.setLevel('debug');
-log.debug(chalk.green(`Starting the 141x runner (version ${packageJson.version}).`, JSON.stringify(argv)));
+log.debug(chalk.green(`Starting the 141x runner (version ${packageJson.version}).\n`, JSON.stringify(argv)));
 main(argv);
