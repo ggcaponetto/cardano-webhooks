@@ -3,67 +3,67 @@
     "offset": 0,
     "rows": [
         {
-            "id": "3f58f837-de48-4aa1-b48f-4674818a6e82",
-            "key": "3f58f837-de48-4aa1-b48f-4674818a6e82",
+            "id": "a77cdcb0-6a3b-42ae-9315-606f78b5f30e",
+            "key": "a77cdcb0-6a3b-42ae-9315-606f78b5f30e",
             "value": {
-                "rev": "7-24f9aed924d6ab72cdad14cab57d66a5"
+                "rev": "1-81a468bfb17fea28f97d1d6ef43da703"
             },
             "doc": {
-                "createdAt": "2021-09-07T09:59:17.739Z",
-                "type": "webhook",
-                "active": true,
-                "name": "Slack Message",
-                "script": "\nasync function callAPI(){\n  // more info on: https://api.slack.com/messaging/sending#permissions\n  \tconst SLACK_WEBHOOK_URL = \"https://hooks.slack.com/services/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\"\n  \tconst updates = ctx.util.updates;\n  \tconst tables = new Set([...updates.map((update) => update.table)]);\n    const message = `processing ${updates.length} updates`;\n    const slackResponse = await ctx.util.axios({\n      method: 'post',\n      url: SLACK_WEBHOOK_URL,\n      data: JSON.stringify({\n        \"text\": message.toString()\n      }),\n      headers: {\n        'Content-Type': 'application/x-www-form-urlencoded',\n        Accept: 'application/json',\n      },\n    }).catch((e) => {\n      ctx.util.toast(e.message, {variant: 'error'});\n      return e;\n    });\n    if(slackResponse && slackResponse.data){\n      ctx.util.toast(JSON.stringify(slackResponse.data), {variant: 'success'});\n    }\n    return slackResponse;\n}\nreturn callAPI();\n",
-                "_id": "3f58f837-de48-4aa1-b48f-4674818a6e82",
-                "_rev": "7-24f9aed924d6ab72cdad14cab57d66a5"
-            }
-        },
-        {
-            "id": "652d2de6-005a-4fa2-a9e4-78bab43f97dc",
-            "key": "652d2de6-005a-4fa2-a9e4-78bab43f97dc",
-            "value": {
-                "rev": "1-435cd84781f739ae16db4be817ae0aa9"
-            },
-            "doc": {
-                "createdAt": "2021-09-07T09:59:16.093Z",
-                "type": "webhook",
-                "active": true,
-                "name": "Discord Message",
-                "script": "\nasync function customWebhook(){\n   \tconsole.log(`processing window`, {window});\n  \tconst updates = ctx.util.updates;\n  \tconst tables = new Set([...updates.map((update) => update.table)]);\n  \tconst message = `Got ${updates.length} updates.`\n  \tlet discordResponse = await ctx.util.axios({\n      method: \"post\",\n      url: \"https://discord.com/api/webhooks/882268616135942244/ClPNaAgaquEQyDUXbBVRb1C-gj6iFtTbieFR-3iN1DqLAm7FSvOuiDwnHTdk5fSxn-SH\",\n      data: {\n\t\tcontent: message.toString()\n      },\n      headers: {\n        \"Content-Type\": \"application/json\",\n        Accept: 'application/json',\n      }\n    });\n  \tif(discordResponse){\n      ctx.util.toast(JSON.stringify(discordResponse.status));\n    } else {\n      ctx.util.toast(e.message, {variant: 'error'});\n    }\n    return discordResponse;\n}\nreturn customWebhook();\n",
-                "_id": "652d2de6-005a-4fa2-a9e4-78bab43f97dc",
-                "_rev": "1-435cd84781f739ae16db4be817ae0aa9"
-            }
-        },
-        {
-            "id": "e3357d6b-f47f-4aec-88c9-7ad13fb243ba",
-            "key": "e3357d6b-f47f-4aec-88c9-7ad13fb243ba",
-            "value": {
-                "rev": "2-41dc4fc91ebd3bca4d8631e7711b44f1"
-            },
-            "doc": {
-                "createdAt": "2021-09-07T09:59:13.907Z",
-                "type": "webhook",
-                "active": true,
-                "name": "Coinbase API Call",
-                "script": "\nasync function callAPI(){\n  \tconst updates = ctx.util.updates;\n  \tconst tables = new Set([...updates.map((update) => update.table)]);\n    const newAdaPrice = await ctx.util.axios({\n      url: 'https://api.coinbase.com/v2/prices/ADA-USD/buy',\n    }).catch((e) => {\n      ctx.util.toast(e.message, {variant: 'error'});\n    });\n\tctx.util.toast(`You called an the Coinbase API after ${updates.length} updates. Response: ${JSON.stringify(newAdaPrice.data)}`);\n  \treturn newAdaPrice;\n}\nreturn callAPI();\n",
-                "_id": "e3357d6b-f47f-4aec-88c9-7ad13fb243ba",
-                "_rev": "2-41dc4fc91ebd3bca4d8631e7711b44f1"
-            }
-        },
-        {
-            "id": "f987819e-eec9-46c4-ac01-69cc6ccf512e",
-            "key": "f987819e-eec9-46c4-ac01-69cc6ccf512e",
-            "value": {
-                "rev": "3-60e1429c72eb7aefe27e380b7ae0881a"
-            },
-            "doc": {
-                "createdAt": "2021-09-07T09:59:11.259Z",
+                "createdAt": "2021-09-07T12:28:40.710Z",
                 "type": "webhook",
                 "active": true,
                 "name": "Custom Webhook",
                 "script": "\nasync function customWebhook(){\n  \tconst updates = ctx.util.updates;\n  \tconst tables = new Set([...updates.map((update) => update.table)]);\n  \tctx.util.toast(`processing ${updates.length} updates of ${tables.length} channels`, {updates, tables});\n  \treturn \"custom webhook executed\";\n}\nreturn customWebhook();\n",
-                "_id": "f987819e-eec9-46c4-ac01-69cc6ccf512e",
-                "_rev": "3-60e1429c72eb7aefe27e380b7ae0881a"
+                "_id": "a77cdcb0-6a3b-42ae-9315-606f78b5f30e",
+                "_rev": "1-81a468bfb17fea28f97d1d6ef43da703"
+            }
+        },
+        {
+            "id": "30cede0b-359d-4f6a-8ecd-d248088b88aa",
+            "key": "30cede0b-359d-4f6a-8ecd-d248088b88aa",
+            "value": {
+                "rev": "1-e4ed0184da01970744a5b46f590a45b2"
+            },
+            "doc": {
+                "createdAt": "2021-09-07T12:28:39.005Z",
+                "type": "webhook",
+                "active": true,
+                "name": "Coinbase API Call",
+                "script": "\nasync function callAPI(){\n  \tconst updates = ctx.util.updates;\n  \tconst tables = new Set([...updates.map((update) => update.table)]);\n    const newAdaPrice = await ctx.util.axios({\n      url: 'https://api.coinbase.com/v2/prices/ADA-USD/buy',\n    }).catch((e) => {\n      ctx.util.toast(e.message, {variant: 'error'});\n    });\n\tctx.util.toast(`You called an the Coinbase API after ${updates.length} updates. Response: ${JSON.stringify(newAdaPrice.data)}`);\n  \treturn newAdaPrice;\n}\nreturn callAPI();\n",
+                "_id": "30cede0b-359d-4f6a-8ecd-d248088b88aa",
+                "_rev": "1-e4ed0184da01970744a5b46f590a45b2"
+            }
+        },
+        {
+            "id": "b96a6b61-d9b8-4840-a383-83f662f823a2",
+            "key": "b96a6b61-d9b8-4840-a383-83f662f823a2",
+            "value": {
+                "rev": "1-c06c2eb7a096f6add83a54586e072274"
+            },
+            "doc": {
+                "createdAt": "2021-09-07T12:28:36.965Z",
+                "type": "webhook",
+                "active": true,
+                "name": "Discord Message",
+                "script": "\nasync function customWebhook(){\n   \tconsole.log(`processing window`, {window});\n  \tconst updates = ctx.util.updates;\n  \tconst tables = new Set([...updates.map((update) => update.table)]);\n  \tconst message = `Got ${updates.length} updates.`\n  \tlet discordResponse = await ctx.util.axios({\n      method: \"post\",\n      url: \"https://discord.com/api/webhooks/882268616135942244/ClPNaAgaquEQyDUXbBVRb1C-gj6iFtTbieFR-3iN1DqLAm7FSvOuiDwnHTdk5fSxn-SH\",\n      data: {\n\t\tcontent: message.toString()\n      },\n      headers: {\n        \"Content-Type\": \"application/json\",\n        Accept: 'application/json',\n      }\n    });\n  \tif(discordResponse){\n      ctx.util.toast(JSON.stringify(discordResponse.status));\n    } else {\n      ctx.util.toast(e.message, {variant: 'error'});\n    }\n    return discordResponse;\n}\nreturn customWebhook();\n",
+                "_id": "b96a6b61-d9b8-4840-a383-83f662f823a2",
+                "_rev": "1-c06c2eb7a096f6add83a54586e072274"
+            }
+        },
+        {
+            "id": "316024cf-350a-457d-8c73-1a44ba1e35e7",
+            "key": "316024cf-350a-457d-8c73-1a44ba1e35e7",
+            "value": {
+                "rev": "2-4fff58d7d4b28c6ef5e8888e094a7f2b"
+            },
+            "doc": {
+                "createdAt": "2021-09-07T12:28:29.309Z",
+                "type": "webhook",
+                "active": true,
+                "name": "Slack Message",
+                "script": "\nasync function callAPI(){\n  // more info on: https://api.slack.com/messaging/sending#permissions\n  \tconst SLACK_WEBHOOK_URL = \"https://hooks.slack.com/services/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\"\n  \tconst updates = ctx.util.updates;\n  \tconst tables = new Set([...updates.map((update) => update.table)]);\n    const message = `processing ${updates.length} updates`;\n    const slackResponse = await ctx.util.axios({\n      method: 'post',\n      url: SLACK_WEBHOOK_URL,\n      data: JSON.stringify({\n        \"text\": message.toString()\n      }),\n      headers: {\n        'Content-Type': 'application/x-www-form-urlencoded',\n        Accept: 'application/json',\n      },\n    }).catch((e) => {\n      ctx.util.toast(e.message, {variant: 'error'});\n      return e;\n    });\n    if(slackResponse && slackResponse.data){\n      ctx.util.toast(JSON.stringify(slackResponse.data), {variant: 'success'});\n    }\n    return slackResponse;\n}\nreturn callAPI();\n",
+                "_id": "316024cf-350a-457d-8c73-1a44ba1e35e7",
+                "_rev": "2-4fff58d7d4b28c6ef5e8888e094a7f2b"
             }
         }
     ]
