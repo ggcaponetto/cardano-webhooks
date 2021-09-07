@@ -100,7 +100,8 @@ function parsePaymentsMessage(args, jsEncrypt) {
 async function executeWebhooks(webhooksFileContent, myMessages) {
   const webhooks = JSON.parse(webhooksFileContent).rows;
   const executions = [];
-  for (let i = 0; i < webhooks.length; i++) {
+  log.debug(`running ${webhooks.length} webhooks`);
+  for (let i = 0; i < webhooks.length; i += 1) {
     const webhook = webhooks[i];
     log.debug(`running webhook "${webhook.doc.name}"`, webhook);
     const util = {
@@ -119,19 +120,18 @@ async function executeWebhooks(webhooksFileContent, myMessages) {
       const runnerFunction = new AsyncFunction(`"use strict"; ${webhook.doc.script};`);
       const res = await runnerFunction().catch((e) => {
         console.error(`error in runnerFunction (${webhook.doc.name})`, e);
-        executions.push({ success: false, res: null, error: e });
-        return e;
+        throw e;
       });
       delete globalThis.ctx;
-      if (res) {
-        executions.push({ success: true, res, error: null });
-      }
-      return executions;
+      executions.push({ success: true, returnValue: res, error: null });
     } catch (e) {
       log.error(e.message, e);
-      executions.push({ success: false, res: null, error: e });
+      executions.push({ success: false, returnValue: null, error: e });
     }
   }
+  const successCount = executions.filter((ex) => ex.success).length;
+  const failureCount = executions.filter((ex) => !ex.success).length;
+  console.error(`run all webhooks. ${successCount} succeeded, ${failureCount} failed.`);
   return executions;
 }
 
