@@ -111,7 +111,20 @@ async function executeWebhooks(webhooksFileContent, myMessages) {
       updates: myMessages,
       axios,
     };
-    const ctx = { webhook, util };
+    const ctx = {
+      webhook,
+      util,
+      urls: {
+        mainnet: {
+          backend: `${process.env.REACT_APP_GATEWAY_MAINNET_HOST}:${process.env.REACT_APP_GATEWAY_MAINNET_PORT}/backend`,
+          wallet: `${process.env.REACT_APP_GATEWAY_MAINNET_HOST}:${process.env.REACT_APP_GATEWAY_MAINNET_PORT}/wallet`,
+        },
+        testnet: {
+          backend: `${process.env.REACT_APP_GATEWAY_TESTNET_HOST}:${process.env.REACT_APP_GATEWAY_TESTNET_PORT}/backend`,
+          wallet: `${process.env.REACT_APP_GATEWAY_TESTNET_HOST}:${process.env.REACT_APP_GATEWAY_TESTNET_PORT}/wallet`,
+        },
+      },
+    };
     if (!webhook.doc.active) return null;
     try {
       // eslint-disable-next-line no-new-func,no-undef

@@ -1,6 +1,6 @@
 {
   "name": "cardano-webhooks",
-  "version": "0.26.0",
+  "version": "0.40.5",
   "description": "A runner for cardano webhooks on the 141x platform",
   "main": "src/index.js",
   "scripts": {
