@@ -18,12 +18,12 @@ const packageJson = require('../package.json');
 log.setLevel('debug');
 
 const SOCKETIO_MAINNET = process.env.SOCKETIO_MAINNET || (() => {
-  const host = 'https://gateway.141x.io:443';
+  const host = 'https://kong.141x.io:443';
   console.info(`no SOCKETIO_MAINNET found. Using default: ${host}`);
   return host;
 })();
 const SOCKETIO_TESTNET = process.env.SOCKETIO_TESTNET || (() => {
-  const host = 'https://gateway.141x-testnet.io:443';
+  const host = 'https://kong.141x-testnet.io:443';
   console.info(`no SOCKETIO_TESTNET found. Using default: ${host}`);
   return host;
 })();
